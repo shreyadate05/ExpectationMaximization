@@ -29,28 +29,40 @@ for i in range(50):
     n = random.gauss(10, 1)
     x = np.append(x, n)
     
-x,y = make_blobs(cluster_std=[1.5, 2.5, 4],random_state=42, n_samples=150, centers=[[0], [5], [10]])
-
-diff_means = np.empty(0).astype(np.float64)
-diff_var   = np.empty(0).astype(np.float64)
+old_vars = [7.5, 7.5, 7.5]
+x,y = make_blobs(cluster_std=old_vars,random_state=20, n_samples=150, centers=[[0], [5], [10]])
+yPred = np.zeros((150,))
+diff_means = [1,1,1]
+diff_var   = [1,1,1]
     
 def calculateExpectedLabels():
-    global pprobs, means, variances, z, x, N, y
+    global pprobs, means, variances, z, x, N, yPred, y
     for i in range(N):
-        y[i] = np.argmax(z[i])
+        yPred[i] = np.argmax(z[i])
+        
+    count = 0
+    for i in range(N):
+        if (yPred[i] == y[i]):
+            count = count + 1
+    print("Accuracy is: ", count/N)
     
 def updateMeans(i):
      global pprobs, means, variances, z, x, N, diff_means
+     old_mean = round(means[i])
      zt = np.transpose(z)
      n  = zt[i] * x[i]
      means[i] = n.sum()/zt[i].sum()
-    
+     new_mean = round(means[i])
+     diff_means[i] = old_mean - new_mean
+
 def updateVariances(i):
-     global pprobs, means, variances, z, x, N, diff_var
+     global pprobs, means, variances, z, x, N, diff_var, old_vars
      zt = np.transpose(z)
      n  = zt[i] *  np.abs(x[i]-means[i])
      variances[i] = n.sum()/zt[i].sum()
-
+     new_var = round(variances[i])
+     diff_var[i] = old_vars[i] - new_var
+     
 def updateProbs(i):
      global pprobs, means, variances, z, x, N
      zt = np.transpose(z)
@@ -71,14 +83,10 @@ def calculateProbs(i, j):
    
 def updateVals():
     global pprobs, means, variances, z, diff_means, diff_var
-    old_means = means.astype(np.float64)
-    old_vars = variances.astype(np.float64)
     for i in range(k):
         updateProbs(i)
         updateMeans(i)
         updateVariances(i)
-    diff_means = means - old_means
-    diff_var = variances - old_vars
 
 def gmm():
     global means, variances, pprobs, N, k, z
@@ -100,7 +108,7 @@ def main():
         print("diff_var: ", diff_var)
         print("--------------------------------")
 
-    #calculateExpectedLabels()
+    calculateExpectedLabels()
     
 if __name__ == "__main__":
     main()
