@@ -7,19 +7,19 @@ This is a temporary script file.
 import numpy as np
 import random
 
-epoch = 1
+epoch = 2
 k = 3
-N = 150
-T = 50
-means     = np.array([1, 4, 9])
-variances = np.array([1, 1, 1])
-pprobs    = np.array([1/3, 1/3, 1/3])
-z         = np.random.normal(means[0], np.sqrt(variances[0]), (N, k))
-x1        = np.random.normal(means[0], np.sqrt(variances[0]), 50)
-x2        = np.random.normal(means[1], np.sqrt(variances[1]), 50)
-x3        = np.random.normal(means[2], np.sqrt(variances[2]), 50)
-x         = np.array(list(x1) + list(x2) + list(x3))
-y         = np.zeros((N, 1))
+N = 17
+T = 51
+means     = np.array([0.3, 4.5, 8.9]).astype(np.float64)
+variances = np.array([1., 1., 1.]).astype(np.float64)
+pprobs    = np.array([1/3, 1/3, 1/3]).astype(np.float32)
+z         = np.random.normal(means[0], np.sqrt(variances[0]), (T, k)).astype(np.float64)
+x1        = np.random.normal(means[0], np.sqrt(variances[0]), N).astype(np.float64)
+x2        = np.random.normal(means[1], np.sqrt(variances[1]), N).astype(np.float64)
+x3        = np.random.normal(means[2], np.sqrt(variances[2]), N).astype(np.float64)
+x         = np.array(list(x1) + list(x2) + list(x3)).astype(np.float64)
+y         = np.zeros((N, 1)).astype(np.float64)
 
 def calculateExpectedLabels():
     global pprobs, means, variances, z, x, N, y
@@ -70,7 +70,6 @@ def gmm():
         for j in range(k):
             z[i][j] = calculateProbs(i, j)
         z[i] = calculateRowSum(z[i])
-    print("--------------------------------")
         
 def main():
     global x, means, variances
@@ -81,6 +80,7 @@ def main():
         updateVals()
         print("updated means    : ", means)
         print("updated variances: ", variances)
+        print("--------------------------------")
 
     #calculateExpectedLabels()
     
