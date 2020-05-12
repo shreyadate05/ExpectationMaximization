@@ -11,11 +11,14 @@ epoch = 1
 k = 3
 N = 150
 T = 50
-means     = np.random.uniform(low=0.5, high=13.3, size=(k, 1))
-variances = np.random.uniform(low=0.5, high=13.3, size=(k, 1))
-pprobs    = np.full((k, 1), 1/k)
-x         = np.random.normal(0.0, pow(1, -0.5),(N, 1))
-z         = np.random.normal(0.0, pow(1, -0.5),(N, k))
+means     = np.array([1, 4, 9])
+variances = np.array([1, 1, 1])
+pprobs    = np.array([1/3, 1/3, 1/3])
+z         = np.random.normal(means[0], np.sqrt(variances[0]), (N, k))
+x1        = np.random.normal(means[0], np.sqrt(variances[0]), 50)
+x2        = np.random.normal(means[1], np.sqrt(variances[1]), 50)
+x3        = np.random.normal(means[2], np.sqrt(variances[2]), 50)
+x         = np.array(list(x1) + list(x2) + list(x3))
 y         = np.zeros((N, 1))
 
 def calculateExpectedLabels():
@@ -32,7 +35,7 @@ def updateMeans(i):
 def updateVariances(i):
      global pprobs, means, variances, z, x, N
      zt = np.transpose(z)
-     n  = zt[i] *  np.linalg.norm(x[i]-means[i])
+     n  = zt[i] *  np.abs(x[i]-means[i])
      variances[i] = n.sum()/zt[i].sum()
 
 def updateProbs(i):
@@ -40,24 +43,26 @@ def updateProbs(i):
      zt = np.transpose(z)
      pprobs[i] = zt[i].sum()/N
  
-def calculateRowSum(z):
-    for row in range(z.shape[0]):
-        z[row] /= np.sum(z[row])
-    return z
+def calculateRowSum(x):
+    for i in range(k):
+        x[i] /= np.sum(x)
+    return x
 
 def calculateProbs(i, j):
     global pprobs, means, variances, z, x
     t  = 2 * np.pi * variances[j]
     n1 = pprobs[j] * (1/np.sqrt(t))
-    n2 = np.exp((-1/(2*variances[j])) * np.linalg.norm(np.square(x[i]-means[j])))
-    return n1*n2
+    n2 = np.exp(-(np.square(x[i]-means[j]))/(2*variances[j]))
+    n = n1 * n2
+    return n
    
 def updateVals():
-    global pprobs, means, variances
+    global pprobs, means, variances, z
     for i in range(k):
+        updateProbs(i)
         updateMeans(i)
         updateVariances(i)
-        updateProbs(i)
+        
 
 def gmm():
     global means, variances, pprobs, N, k, z
@@ -65,12 +70,19 @@ def gmm():
         for j in range(k):
             z[i][j] = calculateProbs(i, j)
         z[i] = calculateRowSum(z[i])
+    print("--------------------------------")
         
 def main():
+    global x, means, variances
     for i in range(epoch):
+        print("old means        : ", means)
+        print("old variances    : ", variances)
         gmm()
         updateVals()
-    calculateExpectedLabels()
+        print("updated means    : ", means)
+        print("updated variances: ", variances)
+
+    #calculateExpectedLabels()
     
 if __name__ == "__main__":
     main()
