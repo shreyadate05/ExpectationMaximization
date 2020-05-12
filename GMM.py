@@ -6,6 +6,7 @@ This is a temporary script file.
 """
 import numpy as np
 import random
+from sklearn.datasets import make_blobs
 
 epoch = 1
 k = 3
@@ -28,19 +29,24 @@ for i in range(50):
     n = random.gauss(10, 1)
     x = np.append(x, n)
     
+x,y = make_blobs(cluster_std=[1.5, 2.5, 4],random_state=42, n_samples=150, centers=[[0], [5], [10]])
+
+diff_means = np.empty(0).astype(np.float64)
+diff_var   = np.empty(0).astype(np.float64)
+    
 def calculateExpectedLabels():
     global pprobs, means, variances, z, x, N, y
     for i in range(N):
         y[i] = np.argmax(z[i])
     
 def updateMeans(i):
-     global pprobs, means, variances, z, x, N
+     global pprobs, means, variances, z, x, N, diff_means
      zt = np.transpose(z)
      n  = zt[i] * x[i]
      means[i] = n.sum()/zt[i].sum()
     
 def updateVariances(i):
-     global pprobs, means, variances, z, x, N
+     global pprobs, means, variances, z, x, N, diff_var
      zt = np.transpose(z)
      n  = zt[i] *  np.abs(x[i]-means[i])
      variances[i] = n.sum()/zt[i].sum()
@@ -64,12 +70,15 @@ def calculateProbs(i, j):
     return n
    
 def updateVals():
-    global pprobs, means, variances, z
+    global pprobs, means, variances, z, diff_means, diff_var
+    old_means = means.astype(np.float64)
+    old_vars = variances.astype(np.float64)
     for i in range(k):
         updateProbs(i)
         updateMeans(i)
         updateVariances(i)
-        
+    diff_means = means - old_means
+    diff_var = variances - old_vars
 
 def gmm():
     global means, variances, pprobs, N, k, z
@@ -79,7 +88,7 @@ def gmm():
         z[i] = calculateRowSum(z[i])
         
 def main():
-    global x, means, variances
+    global x, means, variances, diff_means, diff_var
     for i in range(epoch):
         print("old means        : ", means)
         print("old variances    : ", variances)
@@ -87,6 +96,8 @@ def main():
         updateVals()
         print("updated means    : ", means)
         print("updated variances: ", variances)
+        print("diff_means: ", diff_means)
+        print("diff_var: ", diff_var)
         print("--------------------------------")
 
     #calculateExpectedLabels()
