@@ -7,20 +7,27 @@ This is a temporary script file.
 import numpy as np
 import random
 
-epoch = 2
+epoch = 1
 k = 3
-N = 17
-T = 51
-means     = np.array([0.3, 4.5, 8.9]).astype(np.float64)
+N = 150
+T = 50
+means     = np.array([0, 5, 10]).astype(np.float64)
 variances = np.array([1., 1., 1.]).astype(np.float64)
 pprobs    = np.array([1/3, 1/3, 1/3]).astype(np.float32)
-z         = np.random.normal(means[0], np.sqrt(variances[0]), (T, k)).astype(np.float64)
-x1        = np.random.normal(means[0], np.sqrt(variances[0]), N).astype(np.float64)
-x2        = np.random.normal(means[1], np.sqrt(variances[1]), N).astype(np.float64)
-x3        = np.random.normal(means[2], np.sqrt(variances[2]), N).astype(np.float64)
-x         = np.array(list(x1) + list(x2) + list(x3)).astype(np.float64)
-y         = np.zeros((N, 1)).astype(np.float64)
+z         = np.random.normal(means[0], np.sqrt(variances[0]), (N, k)).astype(np.float64)
+x = np.empty(0)
+for i in range(50):
+    n = random.gauss(0, 1)
+    x = np.append(x, n)
 
+for i in range(50):
+    n = random.gauss(5, 1)
+    x = np.append(x, n)
+    
+for i in range(50):
+    n = random.gauss(10, 1)
+    x = np.append(x, n)
+    
 def calculateExpectedLabels():
     global pprobs, means, variances, z, x, N, y
     for i in range(N):
